@@ -9,9 +9,9 @@ interface EditorContextProps {
 
 export const EditorContext = createContext({
     searchText: "",
-    setSearchText: (text: string) => {},
+    setSearchText: () => { },
     replaceText: "",
-    setReplaceText: (text: string) => {}
+    setReplaceText: () => { }
 
 } as EditorContextProps);
 

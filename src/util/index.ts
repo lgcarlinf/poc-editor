@@ -1,4 +1,4 @@
-import Quill from "quill";
+import ReactQuill from 'react-quill'; // Import the ReactQuill type
 
 export const getAllIndex = (originalText: string, searchText: string) => {
     const size = searchText.length;
@@ -11,11 +11,15 @@ export const getAllIndex = (originalText: string, searchText: string) => {
     return indices;
 };
 
-export const cleanAllFormat = (editor: Quill, searchText: string) => {
-    const totalText = editor.getText();
-    const indexes = getAllIndex(totalText, searchText);
-    indexes.forEach((index) => {
-        const length = searchText.length;
-        editor.formatText(index, length, 'background', false);
-    });
+
+export const cleanAllFormat = (quillRef: React.RefObject<ReactQuill>, searchText: string) => {
+    const editor = quillRef.current?.getEditor();
+    const totalText = editor?.getText();
+    if (totalText) {
+        const indexes = getAllIndex(totalText, searchText);
+        indexes.forEach((index) => {
+            const length = searchText.length;
+            editor?.formatText(index, length, 'background', false);
+        });
+    }
 };

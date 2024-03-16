@@ -1,4 +1,4 @@
-import  { useContext, useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import ReactQuill from 'react-quill';
 import Search from './Search';
 import { EditorContext } from '../context/EditorProvider';
@@ -8,9 +8,9 @@ export const LiveEditor = () => {
 
     const { searchText } = useContext(EditorContext);
     const [value, setValue] = useState('');
-    const quillRef = useRef<ReactQuill>(null); 
+    const quillRef = useRef<ReactQuill>(null);
 
-    const find = ()=>{
+    const find = () => {
         if (!quillRef.current) return;
 
         const editor = quillRef.current.getEditor();
@@ -26,7 +26,7 @@ export const LiveEditor = () => {
         }
     }
 
-    const replaceOneByOne = (textReplace:string) => {
+    const replaceOneByOne = (textReplace: string) => {
         if (!quillRef.current) return;
 
         const editor = quillRef.current.getEditor();
@@ -44,13 +44,13 @@ export const LiveEditor = () => {
     };
 
 
-    const replaceAll = (textReplace:string) => {
+    const replaceAll = (textReplace: string) => {
         if (!quillRef.current) return;
 
         const editor = quillRef.current.getEditor();
         const totalText = editor.getText();
         const regularExpression = new RegExp(searchText, "gi");
-        cleanAllFormat(editor, searchText);
+        cleanAllFormat(quillRef, searchText);
         if (searchText && regularExpression.test(totalText)) {
             const indexes = getAllIndex(totalText, searchText);
 
@@ -65,8 +65,8 @@ export const LiveEditor = () => {
 
     return (
         <>
-        <Search find={find} replaceAll = {replaceAll} replaceOneByOne={replaceOneByOne}/>
-        <ReactQuill theme="snow" value={value} onChange={setValue} ref={quillRef}/>
+            <Search find={find} replaceAll={replaceAll} replaceOneByOne={replaceOneByOne} />
+            <ReactQuill theme="snow" value={value} onChange={setValue} ref={quillRef} />
         </>
     )
 }
