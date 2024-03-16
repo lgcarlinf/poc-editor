@@ -1,72 +1,57 @@
-import { useContext, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import ReactQuill from 'react-quill';
 import Search from './Search';
 import { EditorContext } from '../context/EditorProvider';
-import { cleanAllFormat, getAllIndex } from '../util';
+import { cleanAllFormat } from '../util/helpers';
+import hotkeys from 'hotkeys-js';
 
 export const LiveEditor = () => {
 
-    const { searchText } = useContext(EditorContext);
+    const { isShowSearchOpts, setIsShowSearchOpts, setSearchText, setReplaceText } = useContext(EditorContext);
     const [value, setValue] = useState('');
     const quillRef = useRef<ReactQuill>(null);
 
-    const find = () => {
-        if (!quillRef.current) return;
 
-        const editor = quillRef.current.getEditor();
-        const totalText = editor.getText();
-        const regularExpression = new RegExp(searchText, "gi");
+    const handleSearch = useCallback(() => {
+        setIsShowSearchOpts(!isShowSearchOpts);
+    }, [isShowSearchOpts, setIsShowSearchOpts]);
 
-        if (searchText && regularExpression.test(totalText)) {
-            const indexes = getAllIndex(totalText, searchText);
-            indexes.forEach((index) => {
-                const length = searchText.length;
-                editor.formatText(index, length, 'background', 'yellow');
-            });
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            handleSearch();
         }
     }
 
-    const replaceOneByOne = (textReplace: string) => {
-        if (!quillRef.current) return;
+    useEffect(() => {
+        hotkeys('ctrl+f, command+f', (e) => {
+            e.preventDefault();
+            handleSearch();
+        });
+        return () => {
+            hotkeys.unbind('ctrl+f, command+f');
+        };
+    }, [setIsShowSearchOpts, handleSearch]);
 
-        const editor = quillRef.current.getEditor();
-        const totalText = editor.getText();
-        const regularExpression = new RegExp(searchText, "gi");
-        const index = totalText.toLowerCase().indexOf(searchText.toLowerCase());
-
-        if (searchText && regularExpression.test(totalText) && index !== -1) {
-            const length = searchText.length;
-            editor.deleteText(index, length);
-            editor.insertText(index, textReplace);
-
-            editor.formatText(index, 1, 'background', false);
+    useEffect(() => {
+        if (isShowSearchOpts !== undefined && !isShowSearchOpts) {
+            setSearchText("");
+            setReplaceText("");
+            cleanAllFormat(quillRef);
         }
-    };
+    }, [isShowSearchOpts]);
 
-
-    const replaceAll = (textReplace: string) => {
-        if (!quillRef.current) return;
-
-        const editor = quillRef.current.getEditor();
-        const totalText = editor.getText();
-        const regularExpression = new RegExp(searchText, "gi");
-        cleanAllFormat(quillRef, searchText);
-        if (searchText && regularExpression.test(totalText)) {
-            const indexes = getAllIndex(totalText, searchText);
-
-            for (let i = indexes.length - 1; i >= 0; i--) {
-                const index = indexes[i];
-                const length = searchText.length;
-                editor.deleteText(index, length);
-                editor.insertText(index, textReplace);
-            }
-        }
-    };
 
     return (
         <>
-            <Search find={find} replaceAll={replaceAll} replaceOneByOne={replaceOneByOne} />
-            <ReactQuill theme="snow" value={value} onChange={setValue} ref={quillRef} />
+            <Search handleSearch={handleSearch} quillRef={quillRef} />
+            <ReactQuill
+                theme="snow"
+                value={value}
+                ref={quillRef}
+                onChange={setValue}
+                onKeyDown={handleKeyDown}
+            />
         </>
     )
 }

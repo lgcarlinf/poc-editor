@@ -1,40 +1,16 @@
-import hotkeys from "hotkeys-js";
-import { useContext, useEffect, useState } from "react";
-import { from } from "rxjs";
-import { filter } from "rxjs/operators";
+import { useContext } from "react";
 import { EditorContext } from "../context/EditorProvider";
+import ReactQuill from "react-quill";
+import { replaceAll, find, replaceOneByOne } from '../util/helpers';
 
 interface SearchProps {
-    find: () => void;
-    replaceAll: (textReplace:string) => void;
-    replaceOneByOne: (textReplace:string) => void;
+    handleSearch: () => void;
+    quillRef: React.RefObject<ReactQuill>;
 }
 
-const Search = ({find,replaceAll,replaceOneByOne}:SearchProps) => {
-    const [isShowSearchOpts, setIsShowSearchOpts] = useState(false);
-    const { searchText, setSearchText, replaceText, setReplaceText } = useContext(EditorContext);
+const Search = ({ handleSearch, quillRef }: SearchProps) => {
 
-    useEffect(() => {
-        hotkeys('shift+f', handleSearch);
-        return () => {
-            hotkeys.unbind('shift+f');
-        };
-    }, []);
-
-    const handleSearch = () => {
-        setIsShowSearchOpts(prev => !prev);
-    };
-
-    useEffect(() => {
-        const isShowSearchOpts$ = from([isShowSearchOpts]);
-        const subscription = isShowSearchOpts$
-            .pipe(filter(value => value === true))
-            .subscribe(() => console.log('Opciones de búsqueda mostradas'));
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [isShowSearchOpts]);
+    const { searchText, setSearchText, replaceText, setReplaceText, isShowSearchOpts } = useContext(EditorContext);
 
     const onSearchText = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(e.target.value);
@@ -42,6 +18,12 @@ const Search = ({find,replaceAll,replaceOneByOne}:SearchProps) => {
 
     const onReplaceText = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReplaceText(e.target.value);
+    }
+
+    const paramsReplace = {
+        replaceText,
+        quillRef,
+        searchText
     }
 
     return (
@@ -54,19 +36,20 @@ const Search = ({find,replaceAll,replaceOneByOne}:SearchProps) => {
                             type="text"
                             value={searchText}
                             placeholder='search'
-                            onChange={onSearchText} />
-                        <input 
-                            type="text" 
+                            onChange={onSearchText}
+                        />
+                        <input
+                            type="text"
                             value={replaceText}
                             placeholder='replace'
                             onChange={onReplaceText}
                         />
-                        <button onClick={find}>find</button>
+                        <button onClick={() => find(quillRef, searchText)}>find</button>
                     </div>
-                    <br/>
+                    <br />
                     <div>
-                        <button  onClick={()=>replaceOneByOne(replaceText)}>replace</button>
-                        <button  onClick={()=>replaceAll(replaceText)}>replace all</button>
+                        <button onClick={() => replaceOneByOne(paramsReplace)}>replace</button>
+                        <button onClick={() => replaceAll(paramsReplace)}>replace all</button>
                     </div>
                 </div>
             )}
