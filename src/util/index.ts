@@ -1,4 +1,6 @@
-export const getAllIndex = (originalText:string, searchText:string) => {
+import Quill from "quill";
+
+export const getAllIndex = (originalText: string, searchText: string) => {
     const size = searchText.length;
     let startIndex = 0, index;
     const indices = [];
@@ -9,7 +11,7 @@ export const getAllIndex = (originalText:string, searchText:string) => {
     return indices;
 };
 
-export const cleanAllFormat = (editor, searchText:string) => {
+export const cleanAllFormat = (editor: Quill, searchText: string) => {
     const totalText = editor.getText();
     const indexes = getAllIndex(totalText, searchText);
     indexes.forEach((index) => {
