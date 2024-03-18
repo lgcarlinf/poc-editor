@@ -1,16 +1,16 @@
-import { useContext } from "react";
-import { EditorContext } from "../context/EditorProvider";
 import ReactQuill from "react-quill";
 import { replaceAll, find, replaceOneByOne } from '../util/helpers';
+import { SearchPropsEditor } from "./LiveEditor";
 
 interface SearchProps {
     handleSearch: () => void;
     quillRef: React.RefObject<ReactQuill>;
+    searchPropsEditor: SearchPropsEditor
 }
 
-const Search = ({ handleSearch, quillRef }: SearchProps) => {
+const Search = ({ handleSearch, quillRef, searchPropsEditor }: SearchProps) => {
 
-    const { searchText, setSearchText, replaceText, setReplaceText, isShowSearchOpts } = useContext(EditorContext);
+    const { searchText, setSearchText, replaceText, setReplaceText, isShowSearchOpts } = searchPropsEditor
 
     const onSearchText = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(e.target.value);

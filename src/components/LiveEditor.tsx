@@ -1,16 +1,34 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactQuill from 'react-quill';
 import Search from './Search';
-import { EditorContext } from '../context/EditorProvider';
 import { cleanAllFormat } from '../util/helpers';
 import hotkeys from 'hotkeys-js';
 
+type Maybe<T> = T | undefined;
+export interface SearchPropsEditor{
+    searchText: string;
+    setSearchText: (text: string) => void;
+    replaceText: string;
+    setReplaceText: (text: string) => void;
+    isShowSearchOpts: Maybe<boolean>;
+}
+
 export const LiveEditor = () => {
 
-    const { isShowSearchOpts, setIsShowSearchOpts, setSearchText, setReplaceText } = useContext(EditorContext);
+    const [searchText, setSearchText] = useState("");
+    const [replaceText, setReplaceText] = useState("");
+    const [isShowSearchOpts, setIsShowSearchOpts] = useState<Maybe<boolean>>(undefined);
+
+    const searchPropsEditor:SearchPropsEditor = {
+        searchText,
+        setSearchText,
+        replaceText,
+        setReplaceText,
+        isShowSearchOpts,
+    }
+
     const [value, setValue] = useState('');
     const quillRef = useRef<ReactQuill>(null);
-
 
     const handleSearch = useCallback(() => {
         setIsShowSearchOpts(!isShowSearchOpts);
@@ -44,7 +62,11 @@ export const LiveEditor = () => {
 
     return (
         <>
-            <Search handleSearch={handleSearch} quillRef={quillRef} />
+            <Search 
+                handleSearch={handleSearch} 
+                quillRef={quillRef} 
+                searchPropsEditor={searchPropsEditor}
+            />
             <ReactQuill
                 theme="snow"
                 value={value}
